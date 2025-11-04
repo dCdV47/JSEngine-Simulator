@@ -53,7 +53,7 @@ public:
 
     /**
      * @brief Registers a sequence of instructions as a new Callback.
-     * @param instructions The vector of instructions that defines the callback's logic.
+     * @param instructions The vector of instructions that defines the callback's logic. They represent JS Code.
      * @return The unique ID assigned to the newly registered Callback.
      */
     long long register_callback(std::vector<Instruction> instructions) {

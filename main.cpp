@@ -118,11 +118,7 @@ struct ApiResponse {
  * @param response_queue A reference to the queue where the worker must place the response.
  * @param api_manager_alarm A reference to the ApiManager's alarm to notify it upon completion.
  */
-void sendAPIRequest(
-    ApiRequest request,
-    TaskQueue<ApiResponse>& response_queue,
-    Alarm& api_manager_alarm
-) {
+void sendAPIRequest( ApiRequest request, TaskQueue<ApiResponse>& response_queue, Alarm& api_manager_alarm) {
     // Launch the work in a new thread to avoid blocking the ApiManager.
     std::thread worker_thread(
         // The lambda that contains the code to be executed in the new thread.
@@ -148,6 +144,7 @@ void sendAPIRequest(
 
             // The thread terminates here, and its resources are released.
         },
+        //We pass the args to the lamda functions
         std::move(request),             // Move the request to transfer ownership.
         std::ref(response_queue),       // Pass the queue by reference.
         std::ref(api_manager_alarm)     // Pass the alarm by reference.
@@ -171,13 +168,8 @@ void sendAPIRequest(
  * @param scheduler_queue Reference to the Scheduler's queue to send new tasks.
  * @param scheduler_alarm Reference to the Scheduler's alarm to wake it up.
  */
-void executeStackJS(
-    Callback callback,
-    const std::any& data,
-    ClosureHeap& closure_heap,
-    TaskQueue<Task>& scheduler_queue,
-    Alarm& scheduler_alarm
-) {
+void executeStackJS( Callback callback, const std::any& data, ClosureHeap& closure_heap, TaskQueue<Task>& scheduler_queue, Alarm& scheduler_alarm) 
+{
     std::cout << "  [EventLoop::executeStackJS] >>>> STARTING EXECUTION OF CALLBACK ID: " << callback.id << std::endl;
 
     // Print the data received by the task, if any.
@@ -248,10 +240,13 @@ int main() {
     // Create 3 alarms, one for each main actor thread.
     // Each alarm's wake-up condition is a lambda that checks if its actor's queue(s) are non-empty.
     Alarm scheduler_alarm([&]() { return !scheduler_queue.isEmpty(); });
+
     Alarm api_manager_alarm([&]() { return !api_manager_request_queue.isEmpty() || !api_manager_response_queue.isEmpty(); });
+    
     Alarm event_loop_alarm([&]() {
         return !event_loop_macrotask_queue.isEmpty() || !event_loop_microtask_queue.isEmpty();
     });
+
     std::cout << "[Scheduler/Main]: Alarms created and configured." << std::endl;
 
     // 2. Launch the Scheduler Thread.
@@ -345,14 +340,14 @@ int main() {
                 auto pending_task_it = pending_api_tasks.find(api_response.task_id);
                 if (pending_task_it != pending_api_tasks.end()) {
                     std::cout << "  [ApiManager] Context FOUND for Task ID: " << api_response.task_id << ". Re-composing and dispatching to Scheduler." << std::endl;
-                    Task completed_task = std::move(pending_task_it->second); 
+                    Task completed_task = std::move(pending_task_it->second); //movemos la tarea encuentrada
                     pending_api_tasks.erase(pending_task_it);
 
                     // Re-hydrate the task with the response data and update its source.
                     completed_task.source = TaskSource::API_WORKER;  
                     completed_task.data = api_response.data;  
                     
-                    // Promises (microtasks) often have higher priority. While this simulation doesn't use a priority queue,
+                    // Promises (microtasks) often have higher priority. While this simulation doesn't use a priority queue in the scheduler
                     // pushing to the front achieves a similar effect for immediate processing.
                     if(completed_task.is_promise){
                         std::cout << "    [ApiManager] Task ID " << completed_task.id << " is a promise. Sending with high priority (front)." << std::endl;

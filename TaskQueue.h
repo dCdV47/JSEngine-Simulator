@@ -54,9 +54,6 @@ public:
      * @brief Pops and returns the item from the front of the queue.
      * @return The front-most item. If the queue is empty, a default-constructed
      *         object of type T is returned (e.g., 0 for int, "" for std::string).
-     * @note For a more robust production implementation, this method could return std::optional<T>.
-     *       This would explicitly handle the empty-queue case and avoid ambiguity between
-     *       a legitimate default-constructed value and an "empty" signal.
      */
     T pop() {
         std::lock_guard<std::mutex> lock(m_mutex);
