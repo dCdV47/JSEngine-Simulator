@@ -3,7 +3,7 @@
 El objetivo de esta simulación del motor JS es demostrar de manera práctica y visual los conceptos fundamentales de la concurrencia asíncrona, como el **Event Loop**, las colas de **Macro Tareas** y **Micro Tareas**, la gestión de operaciones de I/O (API's) y el **Closure Heap**.
 
 > 📘 **This document is also available in English:**  
-> [Read in English](README-es.md)
+> [Read in English](README.md)
 
 La simulación está construida sobre una arquitectura multi-hilo que aísla los componentes principales del motor, permitiendo observar cómo interactúan para procesar tareas sin bloquear el hilo de ejecución principal, imitando el comportamiento de entornos como Node.js o el navegador.
 
